@@ -16,49 +16,45 @@ namespace ClockEngine
         [SerializeField]
         private EditMenuContext m_editMenu;
 
-        public ClockFacade clock;
+        private IEnable enabler { get; set; }
+        public ITime time { get; private set; }
 
         private void OnEnable()
         {
-            if (this.clock == null)
+            if (this.enabler == null)
                 return;
             
-            this.clock.Enable();
+            this.enabler.Enable();
         }
 
         private void OnDisable()
         {
-            if (this.clock == null)
+            if (this.enabler == null)
                 return;
             
-            this.clock.Disable();
+            this.enabler.Disable();
         }
 
         public void Initialize()
         {
-            var hourArrowContext = this.m_hours.ToHand(
+            var hourHand = this.m_hours.ToHand(
                 totalTime => (float) (totalTime / 3600d % 24 * 3600d),
                 3600d * 24d, 24d, 720d);
 
-            var minuteArrowContext = this.m_minutes.ToHand(
+            var minuteHand = this.m_minutes.ToHand(
                 totalTime => (float) (totalTime / 60d % 60 * 60d),
                 3600d, 60d, 360d);
 
-            var secondArrowContext = this.m_seconds.ToHand(
+            var secondHand = this.m_seconds.ToHand(
                 totalTime => (float) (totalTime % 60d),
                 60d, 60d, 360d);
 
-            var subContexts = new ClockHand[]
-            {
-                hourArrowContext,
-                minuteArrowContext,
-                secondArrowContext
-            };
+            var clock = new ClockFacade(hourHand, minuteHand, secondHand);
+            this.enabler = clock;
+            this.time = clock;
 
-            this.clock = new ClockFacade(subContexts);
-
-            this.clock.Initialize();
-            this.m_editMenu.Initialize(this.clock);
+            clock.Initialize();
+            this.m_editMenu.Initialize(clock);
         }
     }
 }

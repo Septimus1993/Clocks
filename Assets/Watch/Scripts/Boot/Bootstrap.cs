@@ -26,7 +26,7 @@ namespace ClockEngine
 
             var totalTime = localTime.Hour * 3600d + localTime.Minute * 60d + localTime.Second + localTime.Millisecond / 1000d;
 
-            this.m_clockContext.clock.SetTime(totalTime, true);
+            this.m_clockContext.time.SetTime(totalTime, true);
             this.m_clockContext.enabled = true;
         }
     }

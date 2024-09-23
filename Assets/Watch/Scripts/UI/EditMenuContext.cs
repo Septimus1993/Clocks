@@ -3,20 +3,27 @@ using UnityEngine.UI;
 
 namespace ClockEngine
 {
+    public interface IEdit
+    {
+        void SetEditMode();
+        void ApplyChanges();
+        void RevertChanges();
+    }
+
     public class EditMenuContext : MonoBehaviour
     {
         [SerializeField]
         private Button m_editButton, m_applyButton, m_revertButton;
 
-        public void Initialize(ClockFacade clock)
+        public void Initialize(IEdit editor)
         {
-            this.m_editButton.onClick.AddListener(clock.SetEditMode);
+            this.m_editButton.onClick.AddListener(editor.SetEditMode);
             this.m_editButton.onClick.AddListener(EnableEditMode);
 
-            this.m_applyButton.onClick.AddListener(clock.ApplyChanges);
+            this.m_applyButton.onClick.AddListener(editor.ApplyChanges);
             this.m_applyButton.onClick.AddListener(DisableEditMode);
 
-            this.m_revertButton.onClick.AddListener(clock.RevertChanges);
+            this.m_revertButton.onClick.AddListener(editor.RevertChanges);
             this.m_revertButton.onClick.AddListener(DisableEditMode);
         }
 

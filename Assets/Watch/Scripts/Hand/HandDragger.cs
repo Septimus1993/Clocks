@@ -2,8 +2,6 @@
 
 namespace ClockEngine
 {
-    public delegate void TimeAddCallback(double time);
-
     public class HandDragger : MonoBehaviour
     {
         private bool isDragging = false;
@@ -38,7 +36,6 @@ namespace ClockEngine
             var angle = CalculateAngle() - this.rotationOffset;
             var deltaAngle = Mathf.DeltaAngle(angle, this.transform.eulerAngles.z);
             
-            this.transform.rotation = Quaternion.Euler(0, 0, angle);
             this.onAngleChanged?.Invoke(deltaAngle);
         }
 

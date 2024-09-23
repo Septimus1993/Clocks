@@ -4,28 +4,63 @@ using InputField = TMPro.TMP_InputField;
 
 namespace ClockEngine
 {
-    public delegate float CalculateTimeFunction(double totalTime);
-
-    public class ClockHand
+    public interface IClockHand
     {
-        private readonly GameObject gameObject;
+        double time { get; }
 
-        public readonly Tween tween;
+        void Initialize(ITime clock);
+        void Display();
+        void Hide();
+        void SetNormalMode();
+        void SetEditMode();
+        void GoTo(double totalTime, bool play);
+    }
+
+    public interface ITweenHand
+    {
+        double time { get; }
+        double duration { get; }
+        double clampTime { get; }
+
+        event TweenCallback onUpdate;
+
+        void AddTime(double deltaTime);
+    }
+
+    public interface ITweener
+    {
+        void Play();
+        void Pause();
+    }
+
+    public class ClockHand : IClockHand, ITweenHand, ITweener
+    {
+        private ITime clock;
+
+        private readonly GameObject gameObject;
+        private readonly HandDragger dragger;
+        private IInitialize inputFacade;
+
+        private readonly Tween tween;
+
+        public event TweenCallback onUpdate
+        {
+            add => this.tween.onUpdate += value;
+            remove => this.tween.onUpdate -= value;
+        }
+
+        private readonly CalculateTimeFunction calculateTimeFunc;
 
         public double time => this.tween.position;
-        public readonly double duration;
-        public readonly double clampTime;
-        public readonly double targetAngle;
+        public double duration { get; }
+        public double clampTime { get; }
+        public double targetAngle { get; }
 
-        private TimeAddCallback onTimeAdded;
-        private readonly CalculateTimeFunction timeFunc;
-
-        private NormalHandMode normalMode;
-        private EditHandMode editMode;
-        private InputHandMode inputMode;
+        private IHandMode normalMode;
+        private IHandMode editMode;
         private IHandMode currentMode;
 
-        public ClockHand(HandDragger dragger, InputField inputField, CalculateTimeFunction timeFunc,
+        public ClockHand(HandDragger dragger, InputField inputField, CalculateTimeFunction calculateTimeFunc,
             double duration, double clampTime, double targetAngle)
         {
             this.duration = duration;
@@ -33,22 +68,23 @@ namespace ClockEngine
             this.targetAngle = targetAngle;
 
             this.gameObject = dragger.gameObject;
-            this.timeFunc = timeFunc;
+            this.dragger = dragger;
+            this.calculateTimeFunc = calculateTimeFunc;
 
             this.tween = this.gameObject.transform.DORotate(Vector3.back * (float) this.targetAngle, (float) this.duration, RotateMode.LocalAxisAdd)
                 .SetLoops(-1)
                 .Pause();
 
-            this.normalMode = new NormalHandMode(this);
-            this.editMode = new EditHandMode(this, dragger, inputField);
-            this.inputMode = new InputHandMode(this, inputField);
+            this.normalMode = new NormalEnable(this);
+            this.editMode = new EditEnable(dragger, inputField);
+            this.inputFacade = new InputFacade(this, inputField);
         }
 
-        public void Initialize(TimeAddCallback callback)
+        public void Initialize(ITime clock)
         {
-            this.onTimeAdded += callback;
-            this.editMode.Initialize();
-            this.inputMode.Initialize();
+            this.clock = clock;
+            this.inputFacade.Initialize();
+            this.dragger.onAngleChanged += AddAngle;
         }
 
         public void Display()
@@ -59,6 +95,16 @@ namespace ClockEngine
         public void Hide()
         {
             this.gameObject.SetActive(false);
+        }
+
+        public void Play()
+        {
+            this.tween.Play();
+        }
+
+        public void Pause()
+        {
+            this.tween.Pause();
         }
 
         public void SetNormalMode()
@@ -78,19 +124,25 @@ namespace ClockEngine
             this.currentMode?.Enable();
         }
 
+        private void AddAngle(double deltaAngle)
+        {
+            var deltaTime = deltaAngle * (this.duration / this.targetAngle);
+
+            AddTime(deltaTime);
+        }
+
         public void AddTime(double deltaTime)
         {
-            this.onTimeAdded?.Invoke(deltaTime);
+            this.clock.AddTime(deltaTime, false);
         }
 
         public void GoTo(double totalTime, bool play)
         {
-            this.tween.Goto(CalculateTime(totalTime), play);
-        }
+            if (play != (this.currentMode == this.normalMode))
+                return;
 
-        private float CalculateTime(double totalTime)
-        {
-            return this.timeFunc.Invoke(totalTime);
+            var time = this.calculateTimeFunc.Invoke(totalTime);
+            this.tween.Goto(time, play);
         }
     }
 

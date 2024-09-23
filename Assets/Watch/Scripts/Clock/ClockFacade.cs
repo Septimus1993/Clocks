@@ -1,53 +1,61 @@
-﻿namespace ClockEngine
+﻿using System.Collections.Generic;
+
+namespace ClockEngine
 {
-    public class ClockFacade
+    public interface ITime
     {
-        private ClockHand[] hands;
+        void AddTime(double deltaTime, bool play);
+        void SetTime(double totalTime, bool play);
+    }
 
-        private NormalClockMode normalMode;
-        private EditClockMode editMode;
-        private IClockMode currentMode;
+    public class ClockFacade : ITime, IEdit, IEnable
+    {
+        private double lastTime;
+        private double totalTime => this.hourHand.time;
 
-        public ClockFacade(ClockHand[] hands)
+        private readonly IClockHand hourHand;
+        private readonly IClockHand minuteHand;
+        private readonly IClockHand secondHand;
+
+        public ClockFacade(IClockHand hourHand, IClockHand minuteHand, IClockHand secondHand)
         {
-            this.hands = hands;
-
-            this.normalMode = new NormalClockMode(this.hands);
-            this.editMode = new EditClockMode(this.hands);
+            this.hourHand = hourHand;
+            this.minuteHand = minuteHand;
+            this.secondHand = secondHand;
         }
 
         public void Initialize()
         {
-            this.editMode.Initialize();
+            foreach (var hand in GetHands())
+                hand.Initialize(this);
+
             SetNormalMode();
         }
 
         public void Enable()
         {
-            foreach (var hand in this.hands)
+            foreach (var hand in GetHands())
                 hand.Display();
         }
 
         public void Disable()
         {
-            foreach (var hand in this.hands)
+            foreach (var hand in GetHands())
                 hand.Hide();
         }
 
         public void SetEditMode()
         {
-            SetMode(this.editMode);
+            this.lastTime = this.totalTime;
+
+            foreach (var hand in GetHands())
+                hand.SetEditMode();
         }
 
         public void SetNormalMode()
         {
-            SetMode(this.normalMode);
-        }
-
-        private void SetMode(IClockMode mode)
-        {
-            this.currentMode = mode;
-            this.currentMode?.Enable();
+            foreach (var hand in GetHands())
+                hand.SetNormalMode();
         }
 
         public void ApplyChanges()
@@ -57,13 +65,26 @@
 
         public void RevertChanges()
         {
-            this.editMode.Revert();
+            SetTime(this.lastTime, false);
             SetNormalMode();
+        }
+
+        public void AddTime(double deltaTime, bool play)
+        {
+            SetTime(this.totalTime + deltaTime, play);
         }
 
         public void SetTime(double totalTime, bool play)
         {
-            this.currentMode.SetTime(totalTime, play);
+            foreach (var hand in GetHands())
+                hand.GoTo(totalTime, play);
+        }
+
+        private IEnumerable<IClockHand> GetHands()
+        {
+            yield return this.hourHand;
+            yield return this.minuteHand;
+            yield return this.secondHand;
         }
     }
 }

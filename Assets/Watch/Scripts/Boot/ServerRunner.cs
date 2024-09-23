@@ -5,8 +5,6 @@ using UnityEngine.Networking;
 
 namespace ClockEngine
 {
-    public delegate void TimeLoadDelegate(long timestamp, string timeZoneID);
-
     public class ServerRunner : MonoBehaviour
     {
         [SerializeField]
