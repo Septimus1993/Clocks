@@ -1,21 +1,20 @@
-﻿namespace ClockEngine
-{
-    public class ClockInvoker
-    {
-        private readonly Clock clock;
+﻿using System.Collections.Generic;
 
-        public ClockInvoker(Clock clock)
+namespace ClockEngine
+{
+    public abstract class ClockInvoker<T> : EnumerableInvoker<T> where T : class
+    {
+        public readonly Clock clock;
+
+        protected ClockInvoker(Clock clock)
         {
             this.clock = clock;
         }
 
-        public void Execute(ClockHandCallback callback)
+        protected override IEnumerable<T> GetInstances()
         {
-            if (callback == null)
-                return;
-
             foreach (var hand in this.clock)
-                callback.Invoke(hand);
+                yield return hand as T;
         }
     }
 }

@@ -1,27 +1,22 @@
 ﻿namespace ClockEngine
 {
-    public interface ITime
+    public interface ITimer
     {
+        double time { get; }
+
         void AddTime(double deltaTime, bool play);
         void SetTime(double totalTime, bool play);
     }
 
-    public class ClockTimer : ITime
+    public class ClockTimer : ClockInvoker<ITimerHand>, ITimer
     {
-        private readonly Clock clock;
-        private readonly ClockInvoker invoker;
-
         public double time => this.clock.hoursHand.time;
 
-        public ClockTimer(Clock clock, ClockInvoker invoker)
-        {
-            this.clock = clock;
-            this.invoker = invoker;
-        }
+        public ClockTimer(Clock clock) : base(clock) { }
 
         public void Initialize()
         {
-            this.invoker.Execute(hand => hand.Initialize(this));
+            Execute(hand => hand.Initialize(this));
         }
 
         public void AddTime(double deltaTime, bool play)
@@ -31,7 +26,7 @@
 
         public void SetTime(double totalTime, bool play)
         {
-            this.invoker.Execute(hand => hand.GoTo(totalTime, play));
+            Execute(hand => hand.GoTo(totalTime, play));
         }
     }
 }

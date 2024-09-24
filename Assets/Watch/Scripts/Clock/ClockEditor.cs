@@ -6,18 +6,23 @@
         void RevertChanges();
     }
 
-    public class ClockEditor : IEditor
+    public interface IEditable
     {
-        private readonly ClockTimer timer;
-        private readonly ClockInvoker invoker;
+        void SetNormalMode();
+        void SetEditMode();
+    }
+
+    public class ClockEditor : ClockInvoker<IEditable>, IEditor
+    {
+        private readonly ITimer timer;
 
         private double lastTime;
-        private bool enabled;
 
-        public ClockEditor(ClockTimer timer, ClockInvoker invoker)
+        public bool enabled { get; private set; }
+
+        public ClockEditor(ClockTimer timer) : base(timer.clock)
         {
             this.timer = timer;
-            this.invoker = invoker;
         }
 
         public void Enable()
@@ -27,7 +32,8 @@
 
             this.enabled = true;
             this.lastTime = this.timer.time;
-            this.invoker.Execute(hand => hand.SetEditMode());
+
+            Execute(hand => hand.SetEditMode());
         }
 
         public void Disable()
@@ -36,7 +42,8 @@
                 return;
 
             this.enabled = false;
-            this.invoker.Execute(hand => hand.SetNormalMode());
+
+            Execute(hand => hand.SetNormalMode());
         }
 
         public void ApplyChanges()

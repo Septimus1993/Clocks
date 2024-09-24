@@ -13,10 +13,12 @@ namespace ClockEngine
         [SerializeField]
         private string m_timeZoneId;
 
-        public event TimeLoadCallback onLoad;
+        private ClockContext context;
 
-        public void Initialize()
+        public void Initialize(ClockContext context)
         {
+            this.context = context;
+
             StartCoroutine(LoadTimeLooped());
         }
 
@@ -38,7 +40,7 @@ namespace ClockEngine
             if (!(tempData is JsonResponse data))
                 throw new System.Exception("Failed  to parse JSON");
 
-            this.onLoad?.Invoke(data.time, this.m_timeZoneId);
+            LoadTime(data.time, this.m_timeZoneId);
         }
 
         private IEnumerator LoadTimeLooped()
@@ -49,6 +51,21 @@ namespace ClockEngine
 
                 yield return new WaitForSecondsRealtime(3600f);
             }
+        }
+
+        private void LoadTime(long timeStamp, string timeZoneID)
+        {
+            if (this.context.isEditorMode)
+                return;
+            
+            var timeZone = System.TimeZoneInfo.FindSystemTimeZoneById(timeZoneID);
+            var dateTime = System.DateTimeOffset.FromUnixTimeMilliseconds(timeStamp).DateTime;
+            var localTime = System.TimeZoneInfo.ConvertTimeFromUtc(dateTime, timeZone);
+
+            var totalTime = localTime.Hour * 3600d + localTime.Minute * 60d + localTime.Second + localTime.Millisecond / 1000d;
+
+            this.context.timer.SetTime(totalTime, true);
+            this.context.enabled = true;
         }
     }
 

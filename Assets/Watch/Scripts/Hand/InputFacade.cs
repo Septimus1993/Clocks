@@ -26,30 +26,40 @@ namespace ClockEngine
             this.inputField.onEndEdit.AddListener(OnTextEditEnd);
 
             this.eventTrigger.Clear();
-            this.eventTrigger.AddCallback(EventTriggerType.Select, Enable);
-            this.eventTrigger.AddCallback(EventTriggerType.Deselect, Disable);
+            this.eventTrigger.AddCallback(EventTriggerType.Select, OnSelect);
+            this.eventTrigger.AddCallback(EventTriggerType.Deselect, OnDeselect);
 
             EnableText();
         }
 
-        private void Enable(BaseEventData eventData)
+        public void Enable()
+        {
+            this.inputField.enabled = true;
+        }
+
+        public void Disable()
+        {
+            this.inputField.enabled = false;
+        }
+
+        private void OnSelect(BaseEventData eventData)
         {
             DisableText();
             this.inputField.onValueChanged.AddListener(OnTextEdit);
         }
 
-        private void Disable(BaseEventData eventData)
+        private void OnDeselect(BaseEventData eventData)
         {
             this.inputField.onValueChanged.RemoveListener(OnTextEdit);
             EnableText();
         }
 
-        public void EnableText()
+        private void EnableText()
         {
             this.hand.onUpdate += UpdateText;
         }
 
-        public void DisableText()
+        private void DisableText()
         {
             this.hand.onUpdate -= UpdateText;
         }

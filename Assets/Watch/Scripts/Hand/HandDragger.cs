@@ -2,12 +2,22 @@
 
 namespace ClockEngine
 {
+    public interface IAngleDraggable
+    {
+        void AddAngle(double deltaAngle);
+    }
+
     public class HandDragger : MonoBehaviour
     {
+        private IAngleDraggable draggable;
+
         private bool isDragging = false;
         private float rotationOffset;
 
-        public event TimeAddCallback onAngleChanged; 
+        public void Initialize(IAngleDraggable draggable)
+        {
+            this.draggable = draggable;
+        }
 
         private void Update()
         {
@@ -36,7 +46,7 @@ namespace ClockEngine
             var angle = CalculateAngle() - this.rotationOffset;
             var deltaAngle = Mathf.DeltaAngle(angle, this.transform.eulerAngles.z);
             
-            this.onAngleChanged?.Invoke(deltaAngle);
+            this.draggable.AddAngle(deltaAngle);
         }
 
         private float CalculateAngle()

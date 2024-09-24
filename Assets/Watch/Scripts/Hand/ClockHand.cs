@@ -4,15 +4,9 @@ using InputField = TMPro.TMP_InputField;
 
 namespace ClockEngine
 {
-    public interface IClockHand
+    public interface ITimerHand
     {
-        double time { get; }
-
-        void Initialize(ITime timer);
-        void Display();
-        void Hide();
-        void SetNormalMode();
-        void SetEditMode();
+        void Initialize(ITimer timer);
         void GoTo(double totalTime, bool play);
     }
 
@@ -27,19 +21,13 @@ namespace ClockEngine
         void AddTime(double deltaTime);
     }
 
-    public interface ITweener
+    public class ClockHand : ITimerHand, ITweenHand, IAngleDraggable, IDisplay, IEditable
     {
-        void Play();
-        void Pause();
-    }
-
-    public class ClockHand : IClockHand, ITweenHand, ITweener
-    {
-        private ITime timer;
-
         private readonly GameObject gameObject;
+
+        private ITimer timer;
         private readonly HandDragger dragger;
-        private IInitialize input;
+        private readonly InputFacade input;
 
         private readonly Tween tween;
 
@@ -55,10 +43,6 @@ namespace ClockEngine
         public double duration { get; }
         public double clampTime { get; }
         public double targetAngle { get; }
-
-        private IHandMode normalMode;
-        private IHandMode editMode;
-        private IHandMode currentMode;
 
         public ClockHand(HandDragger dragger, InputField inputField, CalculateTimeFunction calculateTimeFunc,
             double duration, double clampTime, double targetAngle)
@@ -77,16 +61,13 @@ namespace ClockEngine
                 .DORotate(Vector3.back * (float) this.targetAngle, (float) this.duration, RotateMode.LocalAxisAdd)
                 .SetLoops(-1)
                 .Pause();
-
-            this.normalMode = new NormalMode(this);
-            this.editMode = new EditMode(dragger, inputField);
         }
 
-        public void Initialize(ITime timer)
+        public void Initialize(ITimer timer)
         {
             this.timer = timer;
             this.input.Initialize();
-            this.dragger.onAngleChanged += AddAngle;
+            this.dragger.Initialize(this);
 
             SetNormalMode();
         }
@@ -101,34 +82,21 @@ namespace ClockEngine
             this.gameObject.SetActive(false);
         }
 
-        public void Play()
-        {
-            this.tween.Play();
-        }
-
-        public void Pause()
-        {
-            this.tween.Pause();
-        }
-
         public void SetNormalMode()
         {
-            SetMode(this.normalMode);
+            this.dragger.enabled = false;
+            this.input.Disable();
+            this.tween.Play();
         }
 
         public void SetEditMode()
         {
-            SetMode(this.editMode);
+            this.tween.Pause();
+            this.dragger.enabled = true;
+            this.input.Enable();
         }
 
-        private void SetMode(IHandMode mode)
-        {
-            this.currentMode?.Disable();
-            this.currentMode = mode;
-            this.currentMode?.Enable();
-        }
-
-        private void AddAngle(double deltaAngle)
+        public void AddAngle(double deltaAngle)
         {
             var deltaTime = deltaAngle * (this.duration / this.targetAngle);
 
@@ -142,9 +110,6 @@ namespace ClockEngine
 
         public void GoTo(double totalTime, bool play)
         {
-            if (play != (this.currentMode == this.normalMode))
-                return;
-
             var time = this.calculateTimeFunc.Invoke(totalTime);
             this.tween.Goto(time, play);
         }

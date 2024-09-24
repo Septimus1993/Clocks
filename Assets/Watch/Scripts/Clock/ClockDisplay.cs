@@ -1,22 +1,23 @@
 ﻿namespace ClockEngine
 {
-    public class ClockDisplay
+    public interface IDisplay
     {
-        private readonly ClockInvoker clockInvoker;
+        void Display();
+        void Hide();
+    }
 
-        public ClockDisplay(ClockInvoker clockInvoker)
-        {
-            this.clockInvoker = clockInvoker;
-        }
+    public class ClockDisplay : ClockInvoker<IDisplay>
+    {
+        public ClockDisplay(Clock clock) : base(clock) { }
 
         public void Display()
         {
-            this.clockInvoker.Execute(hand => hand.Display());
+            Execute(hand => hand.Display());
         }
 
         public void Hide()
         {
-            this.clockInvoker.Execute(hand => hand.Hide());
+            Execute(hand => hand.Hide());
         }
     }
 }
