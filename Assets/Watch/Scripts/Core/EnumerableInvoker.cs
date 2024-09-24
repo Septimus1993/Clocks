@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 
 namespace ClockEngine
 {
@@ -10,10 +10,10 @@ namespace ClockEngine
             if (callback == null)
                 return;
 
-            foreach (var instance in GetInstances())
+            foreach (T instance in GetInstances())
                 callback.Invoke(instance);
         }
 
-        protected abstract IEnumerable<T> GetInstances();
+        protected abstract IEnumerable GetInstances();
     }
 }

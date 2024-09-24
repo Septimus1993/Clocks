@@ -16,7 +16,7 @@
 
         public void Initialize()
         {
-            Execute(hand => hand.Initialize(this));
+            Execute(InitializeHand);
         }
 
         public void AddTime(double deltaTime, bool play)
@@ -26,7 +26,17 @@
 
         public void SetTime(double totalTime, bool play)
         {
-            Execute(hand => hand.GoTo(totalTime, play));
+            void SetHandTime(ITimerHand hand)
+            {
+                hand.GoTo(totalTime, play);
+            }
+
+            Execute(SetHandTime);
+        }
+
+        private void InitializeHand(ITimerHand hand)
+        {
+            hand.Initialize(this);
         }
     }
 }

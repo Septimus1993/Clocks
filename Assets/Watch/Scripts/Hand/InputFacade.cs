@@ -14,11 +14,14 @@ namespace ClockEngine
         private readonly InputField inputField;
         private readonly EventTrigger eventTrigger;
 
-        public InputFacade(ITweenHand hand, InputField inputField)
+        private readonly bool isIntNumber;
+
+        public InputFacade(ITweenHand hand, InputField inputField, bool isIntNumber)
         {
             this.hand = hand;
             this.inputField = inputField;
             this.eventTrigger = this.inputField.GetComponent<EventTrigger>();
+            this.isIntNumber = isIntNumber;
         }
 
         public void Initialize()
@@ -72,8 +75,13 @@ namespace ClockEngine
         private void OnTextEdit(string text)
         {
             var ratio = this.duration / this.clampTime;
+
             var newTime = int.Parse(text);
-            var oldTime = (int)(this.time / ratio);
+            var oldTime = this.time / ratio;
+
+            if (!this.isIntNumber)
+                oldTime = (int) oldTime;
+
             var deltaTime = (newTime - oldTime) * ratio;
 
             this.hand.AddTime(deltaTime);

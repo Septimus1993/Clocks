@@ -33,7 +33,7 @@
             this.enabled = true;
             this.lastTime = this.timer.time;
 
-            Execute(hand => hand.SetEditMode());
+            Execute(SetEditMode);
         }
 
         public void Disable()
@@ -43,7 +43,7 @@
 
             this.enabled = false;
 
-            Execute(hand => hand.SetNormalMode());
+            Execute(SetNormalMode);
         }
 
         public void ApplyChanges()
@@ -58,6 +58,16 @@
 
             this.timer.SetTime(this.lastTime, false);
             Disable();
+        }
+
+        private static void SetNormalMode(IEditable editable)
+        {
+            editable.SetNormalMode();
+        }
+
+        private static void SetEditMode(IEditable editable)
+        {
+            editable.SetEditMode();
         }
     }
 }

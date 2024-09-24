@@ -44,8 +44,14 @@ namespace ClockEngine
         public double clampTime { get; }
         public double targetAngle { get; }
 
-        public ClockHand(HandDragger dragger, InputField inputField, CalculateTimeFunction calculateTimeFunc,
-            double duration, double clampTime, double targetAngle)
+        public ClockHand(
+            HandDragger dragger, 
+            InputField inputField, 
+            CalculateTimeFunction calculateTimeFunc, 
+            bool isIntNumber, 
+            double duration,
+            double clampTime,
+            double targetAngle)
         {
             this.duration = duration;
             this.clampTime = clampTime;
@@ -53,7 +59,7 @@ namespace ClockEngine
 
             this.gameObject = dragger.gameObject;
             this.dragger = dragger;
-            this.input = new InputFacade(this, inputField);
+            this.input = new InputFacade(this, inputField, isIntNumber);
 
             this.calculateTimeFunc = calculateTimeFunc;
 
@@ -121,10 +127,14 @@ namespace ClockEngine
         public HandDragger dragger;
         public InputField inputField;
 
-        public ClockHand ToHand(CalculateTimeFunction calculateFunc,
-            double duration, double clampTime, double targetAngle)
+        public ClockHand ToHand(
+            CalculateTimeFunction calculateFunc, 
+            bool isIntNumber,
+            double duration, 
+            double clampTime, 
+            double targetAngle)
         {
-            return new ClockHand(this.dragger, this.inputField, calculateFunc, duration, clampTime, targetAngle);
+            return new ClockHand(this.dragger, this.inputField, calculateFunc, isIntNumber, duration, clampTime, targetAngle);
         }
     }
 }

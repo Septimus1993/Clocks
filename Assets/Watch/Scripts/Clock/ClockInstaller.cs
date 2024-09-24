@@ -20,14 +20,17 @@ namespace ClockEngine
         {
             var hoursHand = this.m_hours.ToHand(
                 totalTime => (float) (totalTime / 3600d % 24 * 3600d),
+                false,
                 3600d * 24d, 24d, 720d);
 
             var minutesHand = this.m_minutes.ToHand(
                 totalTime => (float) (totalTime / 60d % 60 * 60d),
+                false,
                 3600d, 60d, 360d);
 
             var secondsHand = this.m_seconds.ToHand(
                 totalTime => (float) (totalTime % 60d),
+                true,
                 60d, 60d, 360d);
 
             var clock = new Clock(hoursHand, minutesHand, secondsHand);

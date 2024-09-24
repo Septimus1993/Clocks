@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
 
 namespace ClockEngine
 {
-    public abstract class ClockInvoker<T> : EnumerableInvoker<T> where T : class
+    public abstract class ClockInvoker<T> : EnumerableInvoker<T>
     {
         public readonly Clock clock;
 
@@ -11,10 +11,10 @@ namespace ClockEngine
             this.clock = clock;
         }
 
-        protected override IEnumerable<T> GetInstances()
+        protected override IEnumerable GetInstances()
         {
             foreach (var hand in this.clock)
-                yield return hand as T;
+                yield return hand;
         }
     }
 }

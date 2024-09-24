@@ -12,12 +12,22 @@
 
         public void Display()
         {
-            Execute(hand => hand.Display());
+            Execute(DisplayHand);
         }
 
         public void Hide()
         {
-            Execute(hand => hand.Hide());
+            Execute(HideHand);
+        }
+
+        private static void DisplayHand(IDisplay hand)
+        {
+            hand.Display();
+        }
+
+        private static void HideHand(IDisplay hand)
+        {
+            hand.Hide();
         }
     }
 }
