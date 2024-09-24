@@ -4,11 +4,11 @@ namespace ClockEngine
 {
     public interface IHandMode : IEnable { }
     
-    public class NormalEnable : IHandMode
+    public class NormalMode : IHandMode
     {
         private readonly ITweener tweener;
 
-        public NormalEnable(ITweener tweener)
+        public NormalMode(ITweener tweener)
         {
             this.tweener = tweener;
         }
@@ -24,12 +24,12 @@ namespace ClockEngine
         }
     }
 
-    public class EditEnable : IHandMode
+    public class EditMode : IHandMode
     {
         private readonly HandDragger dragger;
         private readonly InputField inputField;
 
-        public EditEnable(HandDragger dragger, InputField inputField)
+        public EditMode(HandDragger dragger, InputField inputField)
         {
             this.dragger = dragger;
             this.inputField = inputField;

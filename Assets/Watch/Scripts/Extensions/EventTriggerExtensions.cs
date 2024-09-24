@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 namespace ClockEngine
 {
-    public static class TriggerExtensions
+    public static class EventTriggerExtensions
     {
         public static void AddCallback(this EventTrigger eventTrigger, EventTriggerType eventID, UnityAction<BaseEventData> callback)
         {

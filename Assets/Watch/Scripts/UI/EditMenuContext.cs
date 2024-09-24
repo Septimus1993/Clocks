@@ -3,21 +3,14 @@ using UnityEngine.UI;
 
 namespace ClockEngine
 {
-    public interface IEdit
-    {
-        void SetEditMode();
-        void ApplyChanges();
-        void RevertChanges();
-    }
-
     public class EditMenuContext : MonoBehaviour
     {
         [SerializeField]
         private Button m_editButton, m_applyButton, m_revertButton;
 
-        public void Initialize(IEdit editor)
+        public void Initialize(IEditor editor)
         {
-            this.m_editButton.onClick.AddListener(editor.SetEditMode);
+            this.m_editButton.onClick.AddListener(editor.Enable);
             this.m_editButton.onClick.AddListener(EnableEditMode);
 
             this.m_applyButton.onClick.AddListener(editor.ApplyChanges);

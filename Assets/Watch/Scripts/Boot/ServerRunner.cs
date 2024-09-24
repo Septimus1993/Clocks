@@ -13,7 +13,7 @@ namespace ClockEngine
         [SerializeField]
         private string m_timeZoneId;
 
-        public event TimeLoadDelegate onLoad;
+        public event TimeLoadCallback onLoad;
 
         public void Initialize()
         {

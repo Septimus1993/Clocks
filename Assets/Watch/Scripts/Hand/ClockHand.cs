@@ -8,7 +8,7 @@ namespace ClockEngine
     {
         double time { get; }
 
-        void Initialize(ITime clock);
+        void Initialize(ITime timer);
         void Display();
         void Hide();
         void SetNormalMode();
@@ -35,11 +35,11 @@ namespace ClockEngine
 
     public class ClockHand : IClockHand, ITweenHand, ITweener
     {
-        private ITime clock;
+        private ITime timer;
 
         private readonly GameObject gameObject;
         private readonly HandDragger dragger;
-        private IInitialize inputFacade;
+        private IInitialize input;
 
         private readonly Tween tween;
 
@@ -69,22 +69,26 @@ namespace ClockEngine
 
             this.gameObject = dragger.gameObject;
             this.dragger = dragger;
+            this.input = new InputFacade(this, inputField);
+
             this.calculateTimeFunc = calculateTimeFunc;
 
-            this.tween = this.gameObject.transform.DORotate(Vector3.back * (float) this.targetAngle, (float) this.duration, RotateMode.LocalAxisAdd)
+            this.tween = this.gameObject.transform
+                .DORotate(Vector3.back * (float) this.targetAngle, (float) this.duration, RotateMode.LocalAxisAdd)
                 .SetLoops(-1)
                 .Pause();
 
-            this.normalMode = new NormalEnable(this);
-            this.editMode = new EditEnable(dragger, inputField);
-            this.inputFacade = new InputFacade(this, inputField);
+            this.normalMode = new NormalMode(this);
+            this.editMode = new EditMode(dragger, inputField);
         }
 
-        public void Initialize(ITime clock)
+        public void Initialize(ITime timer)
         {
-            this.clock = clock;
-            this.inputFacade.Initialize();
+            this.timer = timer;
+            this.input.Initialize();
             this.dragger.onAngleChanged += AddAngle;
+
+            SetNormalMode();
         }
 
         public void Display()
@@ -133,7 +137,7 @@ namespace ClockEngine
 
         public void AddTime(double deltaTime)
         {
-            this.clock.AddTime(deltaTime, false);
+            this.timer.AddTime(deltaTime, false);
         }
 
         public void GoTo(double totalTime, bool play)
