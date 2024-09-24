@@ -10,9 +10,6 @@ namespace ClockEngine
         [SerializeField]
         private string m_url;
 
-        [SerializeField]
-        private string m_timeZoneId;
-
         private ClockContext context;
 
         public void Initialize(ClockContext context)
@@ -29,10 +26,7 @@ namespace ClockEngine
             yield return webRequest.SendWebRequest();
 
             if (webRequest.result != UnityWebRequest.Result.Success)
-            {
-                Debug.LogError(webRequest.error);
-                yield break;
-            }
+                throw new System.Exception(webRequest.error);
 
             var jsonResponse = webRequest.downloadHandler.text;
             var tempData = JsonConvert.DeserializeObject<JsonResponse?>(jsonResponse);
@@ -40,7 +34,7 @@ namespace ClockEngine
             if (!(tempData is JsonResponse data))
                 throw new System.Exception("Failed  to parse JSON");
 
-            LoadTime(data.time, this.m_timeZoneId);
+            LoadTime(data);
         }
 
         private IEnumerator LoadTimeLooped()
@@ -53,16 +47,12 @@ namespace ClockEngine
             }
         }
 
-        private void LoadTime(long timeStamp, string timeZoneID)
+        private void LoadTime(JsonResponse response)
         {
             if (this.context.isEditorMode)
                 return;
             
-            var timeZone = System.TimeZoneInfo.FindSystemTimeZoneById(timeZoneID);
-            var dateTime = System.DateTimeOffset.FromUnixTimeMilliseconds(timeStamp).DateTime;
-            var localTime = System.TimeZoneInfo.ConvertTimeFromUtc(dateTime, timeZone);
-
-            var totalTime = localTime.Hour * 3600d + localTime.Minute * 60d + localTime.Second + localTime.Millisecond / 1000d;
+            var totalTime = response.hour * 3600d + response.minute * 60d + response.seconds + response.milliseconds / 1000d;
 
             this.context.timer.SetTime(totalTime, true);
             this.context.enabled = true;
@@ -71,6 +61,9 @@ namespace ClockEngine
 
     public struct JsonResponse
     {
-        public long time;
+        public int hour;
+        public int minute;
+        public int seconds;
+        public int milliseconds;
     }
 }

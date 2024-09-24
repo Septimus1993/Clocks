@@ -420,8 +420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9890465564e7b2349be9909be04d1f33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_url: https://yandex.com/time/sync.json
-  m_timeZoneId: Russian Standard Time
+  m_url: https://timeapi.io/api/Time/current/zone?timeZone=Europe/Moscow
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
